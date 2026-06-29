@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { View, Text, ActivityIndicator, StyleSheet, ScrollView } from 'react-native';
+import { View, Text, ActivityIndicator, StyleSheet, ScrollView, Image } from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
 import { analyzeImage } from '../lib/gemini';
 
@@ -28,7 +28,7 @@ const PROMPTS = {
 };
 
 export default function ResultScreen() {
-  const { base64Image, promptKey } = useLocalSearchParams();
+  const { base64Image, promptKey, photoUri } = useLocalSearchParams();
   const [analysis, setAnalysis] = useState(null);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -81,6 +81,15 @@ export default function ResultScreen() {
 
   return (
     <ScrollView style={styles.container}>
+      {/* Photo Preview */}
+      {photoUri && (
+        <Image 
+          source={{ uri: photoUri }} 
+          style={styles.photoPreview} 
+          resizeMode="cover"
+        />
+      )}
+
       <Text style={styles.personaTitle}>{personaLabels[promptKey] || 'Analysis'}</Text>
       <Text style={styles.sectionTitle}>Objects</Text>
       {analysis.objects.map((obj, i) => (
@@ -98,6 +107,12 @@ export default function ResultScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, padding: 20, paddingTop: 60 },
+  photoPreview: { 
+    width: '100%', 
+    height: 200, 
+    borderRadius: 12, 
+    marginBottom: 16 
+  },
   centered: { flex: 1, justifyContent: 'center', alignItems: 'center' },
   personaTitle: { fontSize: 22, fontWeight: 'bold', color: '#5B3FA3', marginBottom: 8 },
   loadingText: { marginTop: 12, color: '#5A6472' },
