@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { View, Text, ActivityIndicator, StyleSheet, ScrollView, Image, TouchableOpacity } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { analyzeImage } from '../lib/gemini';
+import { supabase } from '../lib/supabase';
 
 const PROMPTS = {
   academic: `Act as a university professor. Looking at this image, provide an academic-style analysis in this exact JSON shape, no extra text:
@@ -38,24 +39,44 @@ export default function ResultScreen() {
     runAnalysis();
   }, []);
 
-  async function runAnalysis() {
-    setLoading(true);
-    setError(null);
-    try {
-      const prompt = PROMPTS[promptKey] || PROMPTS.academic;
-      const result = await analyzeImage(base64Image, prompt);
-      console.log('Gemini response:', JSON.stringify(result));
-      const textPart = result?.candidates?.[0]?.content?.parts?.[0]?.text;
-      if (!textPart) throw new Error('Empty response from Gemini');
-      const clean = textPart.replace(/```json|```/g, '').trim();
-      setAnalysis(JSON.parse(clean));
-    } catch (err) {
-      console.log('Error:', err.message);
-      setError('Could not analyze this image. Please try again.');
-    } finally {
-      setLoading(false);
-    }
+async function runAnalysis() {
+  setLoading(true);
+  setError(null);
+  try {
+    const prompt = PROMPTS[promptKey] || PROMPTS.academic;
+    const result = await analyzeImage(base64Image, prompt);
+    console.log('Gemini response:', JSON.stringify(result));
+    const textPart = result?.candidates?.[0]?.content?.parts?.[0]?.text;
+    if (!textPart) throw new Error('Empty response from Gemini');
+    const clean = textPart.replace(/```json|```/g, '').trim();
+    const parsed = JSON.parse(clean);
+    setAnalysis(parsed);
+
+    // ✅ Save to Supabase
+    await saveToHistory(parsed);
+  } catch (err) {
+    console.log('Error:', err.message);
+    setError('Could not analyze this image. Please try again.');
+  } finally {
+    setLoading(false);
   }
+}
+
+async function saveToHistory(result) {
+  try {
+    const { error } = await supabase.from('analysis_history').insert({
+      objects: result.objects.join(', '),
+      context: result.context,
+      recommendations: Array.isArray(result.recommendations) 
+        ? result.recommendations.join(', ') 
+        : result.recommendations,
+    });
+    if (error) console.log('Supabase error:', error.message);
+    else console.log('Saved to history!');
+  } catch (err) {
+    console.warn('Failed to save history:', err);
+  }
+}
 
   if (loading) {
     return (

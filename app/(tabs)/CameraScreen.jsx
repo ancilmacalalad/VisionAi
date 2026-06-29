@@ -13,7 +13,7 @@ export default function CameraScreen() {
 
 async function takePicture() {
   if (!cameraRef.current) return;
-  const result = await cameraRef.current.takePictureAsync({ quality: 0.7 });
+  const result = await cameraRef.current.takePictureAsync({ quality: 0.5 });
   router.push({ pathname: '/PreviewScreen', params: { photoUri: result.uri } });
 }
 
