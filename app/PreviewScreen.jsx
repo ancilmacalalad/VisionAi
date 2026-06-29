@@ -32,8 +32,25 @@ export default function PreviewScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#000' },
   preview: { flex: 1 },
-  actionRow: { flexDirection: 'row', justifyContent: 'space-around', padding: 20 },
-  retakeButton: { backgroundColor: '#5A6472', padding: 14, borderRadius: 8 },
-  analyzeButton: { backgroundColor: '#5B3FA3', padding: 14, borderRadius: 8 },
+  actionRow: { 
+    flexDirection: 'row', 
+    justifyContent: 'space-around', 
+    padding: 20,
+    backgroundColor: '#111',
+  },
+  retakeButton: { 
+    backgroundColor: '#5A6472', 
+    padding: 20,
+    borderRadius: 8,
+    minWidth: 120,
+    alignItems: 'center',
+  },
+  analyzeButton: { 
+    backgroundColor: '#5B3FA3', 
+    padding: 20,
+    borderRadius: 8,
+    minWidth: 120,
+    alignItems: 'center',
+  },
   buttonText: { color: '#fff', fontWeight: 'bold' },
 });
